@@ -58,6 +58,36 @@
         margin: 12px 0;
         font-size: 18px;
       }
+      .content-wrapper {
+        display: flex;
+        align-self: flex-start;
+        justify-content: space-between;
+      }
+      .content-wrapper:first-child {
+        margin-right: 20px;
+      }
+      .content-list {
+        border: 1px solid #b3b3b3;
+        list-style: none;
+        padding: 10px 12px;
+        border-radius: 8px;
+        box-shadow: 1px 1px 4px #b3b3b3;
+      }
+      .content-list-element {
+        padding: 10px 30px;
+        background: #e6e6e6;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        box-shadow: 1px 1px 4px #b3b3b3;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .content-list-element:hover {
+        background: #fff;
+      }
+      .content-list-element:last-child {
+        margin-bottom: 0;
+      }
     </style>
   </head>
   <body>
@@ -65,7 +95,20 @@
       <div class="header">
         <div class="title-box header-title">Drag and Drop example</div>
       </div>
-      <div class="content"></div>
+      <div class="content">
+        <ul class="content-title">
+          <li>Single list</li>
+        </ul>
+        <div class="content-wrapper">
+          <ul class="content-list">
+            <li class="content-list-element">Item 1</li>
+            <li class="content-list-element">Item 2</li>
+            <li class="content-list-element">Item 3</li>
+            <li class="content-list-element">Item 4</li>
+            <li class="content-list-element">Item 5</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </body>
 </html>
