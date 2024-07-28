@@ -2,21 +2,42 @@ const dragAndDropZone = "drag-and-drop-zone";
 
 interface DnD {
   init: () => void;
+  dragStartHandler: (element: HTMLElement) => void;
+  dragEndHandler: (element: HTMLElement) => void;
 }
 
 class DragAndDrop implements DnD {
-  private dragAndDropSelector;
+  private dragAndDropSelector: HTMLElement;
   private isInit: boolean;
+  private dragAndDropItems: HTMLCollection;
 
   constructor(dragAndDropSelector: HTMLElement) {
     this.dragAndDropSelector = dragAndDropSelector;
     this.isInit = false;
+    this.dragAndDropItems = this.dragAndDropSelector.children;
   }
 
   init() {
     if (!this.isInit) {
       this.isInit = true;
+      for (let i = 0; i < this.dragAndDropItems.length; i++) {
+        this.dragAndDropItems[i].setAttribute("draggable", "true");
+        this.dragAndDropItems[i].addEventListener("dragstart", () =>
+          this.dragStartHandler(<HTMLElement>this.dragAndDropItems[i])
+        );
+        this.dragAndDropItems[i].addEventListener("dragend", () =>
+          this.dragEndHandler(<HTMLElement>this.dragAndDropItems[i])
+        );
+      }
     }
+  }
+
+  dragStartHandler(item: HTMLElement) {
+    item.style.opacity = "0";
+  }
+
+  dragEndHandler(item: HTMLElement) {
+    item.style.opacity = "1";
   }
 }
 
