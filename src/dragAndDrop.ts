@@ -10,11 +10,13 @@ class DragAndDrop implements DnD {
   private dragAndDropSelector: HTMLElement;
   private isInit: boolean;
   private dragAndDropItems: HTMLCollection;
+  private draggingItem: HTMLElement | null;
 
   constructor(dragAndDropSelector: HTMLElement) {
     this.dragAndDropSelector = dragAndDropSelector;
     this.isInit = false;
     this.dragAndDropItems = this.dragAndDropSelector.children;
+    this.draggingItem = null;
   }
 
   init() {
@@ -33,10 +35,12 @@ class DragAndDrop implements DnD {
   }
 
   dragStartHandler(item: HTMLElement) {
+    this.draggingItem = item;
     item.style.opacity = "0";
   }
 
   dragEndHandler(item: HTMLElement) {
+    this.draggingItem = null;
     item.style.opacity = "1";
   }
 }
