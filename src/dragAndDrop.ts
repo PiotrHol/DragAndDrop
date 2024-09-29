@@ -1,4 +1,5 @@
 const dragAndDropZone = "drag-and-drop-zone";
+const defaultDraggingClass = "dragging-item";
 
 interface DnD {
   init: () => void;
@@ -12,6 +13,7 @@ class DragAndDrop implements DnD {
   private isInit: boolean;
   private dragAndDropItems: HTMLElement[];
   private draggingItem: HTMLElement | null;
+  private draggingClass: string;
 
   constructor(dragAndDropListSelector: HTMLElement) {
     this.dragAndDropListSelector = dragAndDropListSelector;
@@ -20,6 +22,9 @@ class DragAndDrop implements DnD {
       this.dragAndDropListSelector.children
     ) as HTMLElement[];
     this.draggingItem = null;
+    this.draggingClass = dragAndDropListSelector.dataset.draggingClass
+      ? dragAndDropListSelector.dataset.draggingClass
+      : defaultDraggingClass;
   }
 
   init() {
@@ -33,19 +38,22 @@ class DragAndDrop implements DnD {
         dndItem.addEventListener("dragover", (e: Event) =>
           this.dragOverHandler(e)
         );
-        dndItem.addEventListener("dragend", () => this.dragEndHandler());
+        dndItem.addEventListener("dragend", () => this.dragEndHandler(dndItem));
       });
     }
   }
 
   dragStartHandler(item: HTMLElement) {
     this.draggingItem = item;
-    item.style.opacity = "0";
+    item.classList.add(this.draggingClass);
   }
 
   dragOverHandler(e: Event) {
     const event = e as DragEvent;
     event.preventDefault();
+    this.dragAndDropItems = Array.from(
+      this.dragAndDropListSelector.children
+    ) as HTMLElement[];
     const notDraggingItems = this.dragAndDropItems.filter(
       (item) => item !== this.draggingItem
     ) as HTMLElement[];
@@ -59,10 +67,8 @@ class DragAndDrop implements DnD {
     this.draggingItem?.parentNode?.insertBefore(this.draggingItem, nextItem);
   }
 
-  dragEndHandler() {
-    if (this.draggingItem) {
-      this.draggingItem.style.opacity = "1";
-    }
+  dragEndHandler(item: HTMLElement) {
+    item.classList.remove(this.draggingClass);
     this.draggingItem = null;
   }
 }
