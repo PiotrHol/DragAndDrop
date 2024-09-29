@@ -8,15 +8,15 @@ interface DnD {
 }
 
 class DragAndDrop implements DnD {
-  private dragAndDropSelector: HTMLElement;
+  private dragAndDropListSelector: HTMLElement;
   private isInit: boolean;
   private dragAndDropItems: HTMLCollection;
   private draggingItem: HTMLElement | null;
 
-  constructor(dragAndDropSelector: HTMLElement) {
-    this.dragAndDropSelector = dragAndDropSelector;
+  constructor(dragAndDropListSelector: HTMLElement) {
+    this.dragAndDropListSelector = dragAndDropListSelector;
     this.isInit = false;
-    this.dragAndDropItems = this.dragAndDropSelector.children;
+    this.dragAndDropItems = this.dragAndDropListSelector.children;
     this.draggingItem = null;
   }
 
