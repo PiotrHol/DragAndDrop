@@ -10,31 +10,31 @@ interface DnD {
 class DragAndDrop implements DnD {
   private dragAndDropListSelector: HTMLElement;
   private isInit: boolean;
-  private dragAndDropItems: HTMLCollection;
+  private dragAndDropItems: HTMLElement[];
   private draggingItem: HTMLElement | null;
 
   constructor(dragAndDropListSelector: HTMLElement) {
     this.dragAndDropListSelector = dragAndDropListSelector;
     this.isInit = false;
-    this.dragAndDropItems = this.dragAndDropListSelector.children;
+    this.dragAndDropItems = Array.from(
+      this.dragAndDropListSelector.children
+    ) as HTMLElement[];
     this.draggingItem = null;
   }
 
   init() {
     if (!this.isInit) {
       this.isInit = true;
-      for (let i = 0; i < this.dragAndDropItems.length; i++) {
-        this.dragAndDropItems[i].setAttribute("draggable", "true");
-        this.dragAndDropItems[i].addEventListener("dragstart", () =>
-          this.dragStartHandler(<HTMLElement>this.dragAndDropItems[i])
+      this.dragAndDropItems.forEach((dndItem) => {
+        dndItem.setAttribute("draggable", "true");
+        dndItem.addEventListener("dragstart", () =>
+          this.dragStartHandler(dndItem)
         );
-        this.dragAndDropItems[i].addEventListener("dragover", (e: Event) =>
+        dndItem.addEventListener("dragover", (e: Event) =>
           this.dragOverHandler(e)
         );
-        this.dragAndDropItems[i].addEventListener("dragend", () =>
-          this.dragEndHandler(<HTMLElement>this.dragAndDropItems[i])
-        );
-      }
+        dndItem.addEventListener("dragend", () => this.dragEndHandler());
+      });
     }
   }
 
@@ -46,7 +46,7 @@ class DragAndDrop implements DnD {
   dragOverHandler(e: Event) {
     const event = e as DragEvent;
     event.preventDefault();
-    const notDraggingItems = Array.from(this.dragAndDropItems).filter(
+    const notDraggingItems = this.dragAndDropItems.filter(
       (item) => item !== this.draggingItem
     ) as HTMLElement[];
     const nextItem = notDraggingItems.find((item) => {
@@ -59,9 +59,11 @@ class DragAndDrop implements DnD {
     this.draggingItem?.parentNode?.insertBefore(this.draggingItem, nextItem);
   }
 
-  dragEndHandler(item: HTMLElement) {
+  dragEndHandler() {
+    if (this.draggingItem) {
+      this.draggingItem.style.opacity = "1";
+    }
     this.draggingItem = null;
-    item.style.opacity = "1";
   }
 }
 
