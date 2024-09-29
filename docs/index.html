@@ -81,12 +81,16 @@
         box-shadow: 1px 1px 4px #b3b3b3;
         cursor: pointer;
         transition: all 0.3s;
+        opacity: 1;
       }
       .content-list-element:hover {
         background: #fff;
       }
       .content-list-element:last-child {
         margin-bottom: 0;
+      }
+      .content-list-element.dragging-item {
+        opacity: 0;
       }
     </style>
   </head>
@@ -100,7 +104,10 @@
           <li>Single list</li>
         </ul>
         <div class="content-wrapper">
-          <ul class="content-list drag-and-drop-zone">
+          <ul
+            class="content-list drag-and-drop-zone"
+            data-dragging-class="dragging-item"
+          >
             <li class="content-list-element">Item 1</li>
             <li class="content-list-element">Item 2</li>
             <li class="content-list-element">Item 3</li>
