@@ -3,6 +3,7 @@ const dragAndDropZone = "drag-and-drop-zone";
 interface DnD {
   init: () => void;
   dragStartHandler: (element: HTMLElement) => void;
+  dragOverHandler: (e: Event) => void;
   dragEndHandler: (element: HTMLElement) => void;
 }
 
@@ -27,6 +28,9 @@ class DragAndDrop implements DnD {
         this.dragAndDropItems[i].addEventListener("dragstart", () =>
           this.dragStartHandler(<HTMLElement>this.dragAndDropItems[i])
         );
+        this.dragAndDropItems[i].addEventListener("dragover", (e: Event) =>
+          this.dragOverHandler(e)
+        );
         this.dragAndDropItems[i].addEventListener("dragend", () =>
           this.dragEndHandler(<HTMLElement>this.dragAndDropItems[i])
         );
@@ -37,6 +41,22 @@ class DragAndDrop implements DnD {
   dragStartHandler(item: HTMLElement) {
     this.draggingItem = item;
     item.style.opacity = "0";
+  }
+
+  dragOverHandler(e: Event) {
+    const event = e as DragEvent;
+    event.preventDefault();
+    const notDraggingItems = Array.from(this.dragAndDropItems).filter(
+      (item) => item !== this.draggingItem
+    ) as HTMLElement[];
+    const nextItem = notDraggingItems.find((item) => {
+      const notDraggingItemRect = item.getBoundingClientRect();
+      return (
+        event.clientY <=
+        notDraggingItemRect.top + notDraggingItemRect.height / 2
+      );
+    }) as Node;
+    this.draggingItem?.parentNode?.insertBefore(this.draggingItem, nextItem);
   }
 
   dragEndHandler(item: HTMLElement) {
