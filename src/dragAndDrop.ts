@@ -1,4 +1,3 @@
-const dragAndDropZone = "drag-and-drop-zone";
 const defaultDraggingClass = "dragging-item";
 
 interface DnD {
@@ -73,12 +72,25 @@ class DragAndDrop implements DnD {
   }
 }
 
-const nodeDragAndDropContainers: NodeListOf<HTMLElement> =
-  document.querySelectorAll(`.${dragAndDropZone}`);
-
-const dragAndDropContainers: DragAndDrop[] = [];
-
-for (let i = 0; i < nodeDragAndDropContainers.length; i++) {
-  dragAndDropContainers.push(new DragAndDrop(nodeDragAndDropContainers[i]));
-  dragAndDropContainers[dragAndDropContainers.length - 1].init();
+declare global {
+  interface HTMLElement {
+    dragAndDrop(): void;
+  }
 }
+
+HTMLElement.prototype.dragAndDrop = function () {
+  const dragAndDrop = new DragAndDrop(this);
+  dragAndDrop.init();
+};
+
+export {};
+
+// Add to HTML file and remove here
+
+(
+  document.querySelector(".drag-and-drop-zone-one") as HTMLElement
+).dragAndDrop();
+
+(
+  document.querySelector(".drag-and-drop-zone-two") as HTMLElement
+).dragAndDrop();
