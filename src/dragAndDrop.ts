@@ -2,9 +2,9 @@ const defaultDraggingClass = "dragging-item";
 
 interface DnD {
   init: () => void;
-  dragStartHandler: (element: HTMLElement) => void;
-  dragOverHandler: (e: Event) => void;
-  dragEndHandler: (element: HTMLElement) => void;
+  dragStartHandler: (e: DragEvent, element: HTMLElement) => void;
+  dragOverHandler: (e: DragEvent) => void;
+  dragEndHandler: (e: DragEvent, element: HTMLElement) => void;
 }
 
 class DragAndDrop implements DnD {
@@ -13,8 +13,16 @@ class DragAndDrop implements DnD {
   private dragAndDropItems: HTMLElement[];
   private draggingItem: HTMLElement | null;
   private draggingClass: string;
+  private onDragStart: (e?: DragEvent) => void;
+  private onDragOver: (e?: DragEvent) => void;
+  private onDragEnd: (e?: DragEvent) => void;
 
-  constructor(dragAndDropListSelector: HTMLElement) {
+  constructor(
+    dragAndDropListSelector: HTMLElement,
+    onDragStart: (e?: DragEvent) => void,
+    onDragOver: (e?: DragEvent) => void,
+    onDragEnd: (e?: DragEvent) => void
+  ) {
     this.dragAndDropListSelector = dragAndDropListSelector;
     this.isInit = false;
     this.dragAndDropItems = Array.from(
@@ -24,6 +32,9 @@ class DragAndDrop implements DnD {
     this.draggingClass = dragAndDropListSelector.dataset.draggingClass
       ? dragAndDropListSelector.dataset.draggingClass
       : defaultDraggingClass;
+    this.onDragStart = onDragStart;
+    this.onDragOver = onDragOver;
+    this.onDragEnd = onDragEnd;
   }
 
   init() {
@@ -31,25 +42,27 @@ class DragAndDrop implements DnD {
       this.isInit = true;
       this.dragAndDropItems.forEach((dndItem) => {
         dndItem.setAttribute("draggable", "true");
-        dndItem.addEventListener("dragstart", () =>
-          this.dragStartHandler(dndItem)
+        dndItem.addEventListener("dragstart", (e: DragEvent) =>
+          this.dragStartHandler(e, dndItem)
         );
-        dndItem.addEventListener("dragover", (e: Event) =>
+        dndItem.addEventListener("dragover", (e: DragEvent) =>
           this.dragOverHandler(e)
         );
-        dndItem.addEventListener("dragend", () => this.dragEndHandler(dndItem));
+        dndItem.addEventListener("dragend", (e: DragEvent) =>
+          this.dragEndHandler(e, dndItem)
+        );
       });
     }
   }
 
-  dragStartHandler(item: HTMLElement) {
+  dragStartHandler(e: DragEvent, item: HTMLElement) {
     this.draggingItem = item;
     item.classList.add(this.draggingClass);
+    this.onDragStart(e);
   }
 
-  dragOverHandler(e: Event) {
-    const event = e as DragEvent;
-    event.preventDefault();
+  dragOverHandler(e: DragEvent) {
+    e.preventDefault();
     this.dragAndDropItems = Array.from(
       this.dragAndDropListSelector.children
     ) as HTMLElement[];
@@ -59,27 +72,36 @@ class DragAndDrop implements DnD {
     const nextItem = notDraggingItems.find((item) => {
       const notDraggingItemRect = item.getBoundingClientRect();
       return (
-        event.clientY <=
-        notDraggingItemRect.top + notDraggingItemRect.height / 2
+        e.clientY <= notDraggingItemRect.top + notDraggingItemRect.height / 2
       );
     }) as Node;
     this.draggingItem?.parentNode?.insertBefore(this.draggingItem, nextItem);
+    this.onDragOver(e);
   }
 
-  dragEndHandler(item: HTMLElement) {
+  dragEndHandler(e: DragEvent, item: HTMLElement) {
     item.classList.remove(this.draggingClass);
     this.draggingItem = null;
+    this.onDragEnd(e);
   }
 }
 
 declare global {
   interface HTMLElement {
-    dragAndDrop(): void;
+    dragAndDrop(
+      onDragStart?: (e?: DragEvent) => void,
+      onDragOver?: (e?: DragEvent) => void,
+      onDragEnd?: (e?: DragEvent) => void
+    ): void;
   }
 }
 
-HTMLElement.prototype.dragAndDrop = function () {
-  const dragAndDrop = new DragAndDrop(this);
+HTMLElement.prototype.dragAndDrop = function (
+  onDragStart = () => {},
+  onDragOver = () => {},
+  onDragEnd = () => {}
+) {
+  const dragAndDrop = new DragAndDrop(this, onDragStart, onDragOver, onDragEnd);
   dragAndDrop.init();
 };
 
@@ -87,9 +109,11 @@ export {};
 
 // Add to HTML file and remove here
 
-(
-  document.querySelector(".drag-and-drop-zone-one") as HTMLElement
-).dragAndDrop();
+(document.querySelector(".drag-and-drop-zone-one") as HTMLElement).dragAndDrop(
+  () => console.log("Drag start"),
+  () => console.log("Drag over"),
+  () => console.log("Drag end")
+);
 
 (
   document.querySelector(".drag-and-drop-zone-two") as HTMLElement
