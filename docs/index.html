@@ -92,6 +92,9 @@
       .content-list-element.dragging-item {
         opacity: 0;
       }
+      .content-list-element.second-dragging-item {
+        opacity: 0.2;
+      }
     </style>
   </head>
   <body>
@@ -104,10 +107,7 @@
           <li>Single list</li>
         </ul>
         <div class="content-wrapper">
-          <ul
-            class="content-list drag-and-drop-zone-one"
-            data-dragging-class="dragging-item"
-          >
+          <ul class="content-list drag-and-drop-zone-one">
             <li class="content-list-element">Item 1</li>
             <li class="content-list-element">Item 2</li>
             <li class="content-list-element">Item 3</li>
@@ -121,7 +121,6 @@
         <div class="content-wrapper">
           <ul
             class="content-list drag-and-drop-zone-two"
-            data-dragging-class="dragging-item"
             data-remove-item="true"
           >
             <li class="content-list-element">Item 1</li>

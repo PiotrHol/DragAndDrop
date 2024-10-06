@@ -19,6 +19,7 @@ class DragAndDrop implements DnD {
 
   constructor(
     dragAndDropListSelector: HTMLElement,
+    draggingClass: string,
     onDragStart: (e?: DragEvent) => void,
     onDragOver: (e?: DragEvent) => void,
     onDragEnd: (e?: DragEvent) => void
@@ -29,9 +30,7 @@ class DragAndDrop implements DnD {
       this.dragAndDropListSelector.children
     ) as HTMLElement[];
     this.draggingItem = null;
-    this.draggingClass = dragAndDropListSelector.dataset.draggingClass
-      ? dragAndDropListSelector.dataset.draggingClass
-      : defaultDraggingClass;
+    this.draggingClass = draggingClass;
     this.onDragStart = onDragStart;
     this.onDragOver = onDragOver;
     this.onDragEnd = onDragEnd;
@@ -88,20 +87,31 @@ class DragAndDrop implements DnD {
 
 declare global {
   interface HTMLElement {
-    dragAndDrop(
-      onDragStart?: (e?: DragEvent) => void,
-      onDragOver?: (e?: DragEvent) => void,
-      onDragEnd?: (e?: DragEvent) => void
-    ): void;
+    dragAndDrop(settings?: {
+      draggingClass?: string;
+      onDragStart?: (e?: DragEvent) => void;
+      onDragOver?: (e?: DragEvent) => void;
+      onDragEnd?: (e?: DragEvent) => void;
+    }): void;
   }
 }
 
-HTMLElement.prototype.dragAndDrop = function (
-  onDragStart = () => {},
-  onDragOver = () => {},
-  onDragEnd = () => {}
-) {
-  const dragAndDrop = new DragAndDrop(this, onDragStart, onDragOver, onDragEnd);
+HTMLElement.prototype.dragAndDrop = function (settings) {
+  const settingsToSet = {
+    draggingClass: settings?.draggingClass
+      ? settings.draggingClass
+      : defaultDraggingClass,
+    onDragStart: settings?.onDragStart ? settings.onDragStart : () => {},
+    onDragOver: settings?.onDragOver ? settings.onDragOver : () => {},
+    onDragEnd: settings?.onDragEnd ? settings.onDragEnd : () => {},
+  };
+  const dragAndDrop = new DragAndDrop(
+    this,
+    settingsToSet.draggingClass,
+    settingsToSet.onDragStart,
+    settingsToSet.onDragOver,
+    settingsToSet.onDragEnd
+  );
   dragAndDrop.init();
 };
 
@@ -109,12 +119,11 @@ export {};
 
 // Add to HTML file and remove here
 
-(document.querySelector(".drag-and-drop-zone-one") as HTMLElement).dragAndDrop(
-  () => console.log("Drag start"),
-  () => console.log("Drag over"),
-  () => console.log("Drag end")
-);
+(document.querySelector(".drag-and-drop-zone-one") as HTMLElement).dragAndDrop({
+  onDragStart: () => console.log("Drag start"),
+  onDragEnd: () => console.log("Drag end"),
+});
 
-(
-  document.querySelector(".drag-and-drop-zone-two") as HTMLElement
-).dragAndDrop();
+(document.querySelector(".drag-and-drop-zone-two") as HTMLElement).dragAndDrop({
+  draggingClass: "second-dragging-item",
+});
