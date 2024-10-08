@@ -67,6 +67,9 @@
         margin-right: 20px;
       }
       .content-list {
+        box-sizing: border-box;
+        min-width: 130px;
+        min-height: 58px;
         border: 1px solid #b3b3b3;
         list-style: none;
         padding: 10px 12px;
@@ -119,15 +122,14 @@
           <li>Single list with deletion</li>
         </ul>
         <div class="content-wrapper">
-          <ul
-            class="content-list drag-and-drop-zone-two"
-            data-remove-item="true"
-          >
+          <ul class="content-list drag-and-drop-zone-two">
             <li class="content-list-element">Item 1</li>
             <li class="content-list-element">Item 2</li>
             <li class="content-list-element">Item 3</li>
             <li class="content-list-element">Item 4</li>
             <li class="content-list-element">Item 5</li>
+            <li class="content-list-element">Item 6</li>
+            <li class="content-list-element">Item 7</li>
           </ul>
         </div>
       </div>

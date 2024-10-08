@@ -13,6 +13,7 @@ class DragAndDrop implements DnD {
   private dragAndDropItems: HTMLElement[];
   private draggingItem: HTMLElement | null;
   private draggingClass: string;
+  private isRemoveItemLogic: boolean;
   private onDragStart: (e?: DragEvent) => void;
   private onDragOver: (e?: DragEvent) => void;
   private onDragEnd: (e?: DragEvent) => void;
@@ -20,6 +21,7 @@ class DragAndDrop implements DnD {
   constructor(
     dragAndDropListSelector: HTMLElement,
     draggingClass: string,
+    removeItem: boolean,
     onDragStart: (e?: DragEvent) => void,
     onDragOver: (e?: DragEvent) => void,
     onDragEnd: (e?: DragEvent) => void
@@ -31,6 +33,7 @@ class DragAndDrop implements DnD {
     ) as HTMLElement[];
     this.draggingItem = null;
     this.draggingClass = draggingClass;
+    this.isRemoveItemLogic = removeItem;
     this.onDragStart = onDragStart;
     this.onDragOver = onDragOver;
     this.onDragEnd = onDragEnd;
@@ -79,6 +82,18 @@ class DragAndDrop implements DnD {
   }
 
   dragEndHandler(e: DragEvent, item: HTMLElement) {
+    if (this.isRemoveItemLogic) {
+      const dragAndDropListRect =
+        this.dragAndDropListSelector.getBoundingClientRect();
+      if (
+        e.clientY < dragAndDropListRect.top ||
+        e.clientY > dragAndDropListRect.top + dragAndDropListRect.height ||
+        e.clientX < dragAndDropListRect.left ||
+        e.clientX > dragAndDropListRect.left + dragAndDropListRect.width
+      ) {
+        item.parentNode?.removeChild(item);
+      }
+    }
     item.classList.remove(this.draggingClass);
     this.draggingItem = null;
     this.onDragEnd(e);
@@ -89,6 +104,7 @@ declare global {
   interface HTMLElement {
     dragAndDrop(settings?: {
       draggingClass?: string;
+      removeItem?: boolean;
       onDragStart?: (e?: DragEvent) => void;
       onDragOver?: (e?: DragEvent) => void;
       onDragEnd?: (e?: DragEvent) => void;
@@ -101,6 +117,7 @@ HTMLElement.prototype.dragAndDrop = function (settings) {
     draggingClass: settings?.draggingClass
       ? settings.draggingClass
       : defaultDraggingClass,
+    removeItem: settings?.removeItem ? settings.removeItem : false,
     onDragStart: settings?.onDragStart ? settings.onDragStart : () => {},
     onDragOver: settings?.onDragOver ? settings.onDragOver : () => {},
     onDragEnd: settings?.onDragEnd ? settings.onDragEnd : () => {},
@@ -108,6 +125,7 @@ HTMLElement.prototype.dragAndDrop = function (settings) {
   const dragAndDrop = new DragAndDrop(
     this,
     settingsToSet.draggingClass,
+    settingsToSet.removeItem,
     settingsToSet.onDragStart,
     settingsToSet.onDragOver,
     settingsToSet.onDragEnd
@@ -126,4 +144,5 @@ export {};
 
 (document.querySelector(".drag-and-drop-zone-two") as HTMLElement).dragAndDrop({
   draggingClass: "second-dragging-item",
+  removeItem: true,
 });
