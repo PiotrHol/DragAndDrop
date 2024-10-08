@@ -65,6 +65,9 @@ class DragAndDrop implements DnD {
 
   dragOverHandler(e: DragEvent) {
     e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
     this.dragAndDropItems = Array.from(
       this.dragAndDropListSelector.children
     ) as HTMLElement[];
