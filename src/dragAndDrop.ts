@@ -82,7 +82,9 @@ class DragAndDrop implements DnD {
   dragStartHandler(e: DragEvent, item: HTMLElement) {
     draggingItem = item;
     item.classList.add(this.draggingClass);
-    overActiveDragAndDropBox = this.dragAndDropListSelector;
+    if (this.dragAndDropListSelector.contains(item)) {
+      overActiveDragAndDropBox = this.dragAndDropListSelector;
+    }
     this.onDragStart(e);
   }
 
