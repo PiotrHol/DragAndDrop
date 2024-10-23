@@ -12,7 +12,7 @@ interface DnD {
 }
 
 class DragAndDrop implements DnD {
-  private dragAndDropListSelector: HTMLElement;
+  private dragAndDropList: HTMLElement;
   private isInit: boolean;
   private dragAndDropItems: HTMLElement[];
   private draggingClass: string;
@@ -23,7 +23,7 @@ class DragAndDrop implements DnD {
   private onDragEnd: (e?: DragEvent) => void;
 
   constructor(
-    dragAndDropListSelector: HTMLElement,
+    dragAndDropList: HTMLElement,
     draggingClass: string,
     removeItem: boolean,
     allowDnDFromSelectors: string[],
@@ -31,10 +31,10 @@ class DragAndDrop implements DnD {
     onDragOver: (e?: DragEvent) => void,
     onDragEnd: (e?: DragEvent) => void
   ) {
-    this.dragAndDropListSelector = dragAndDropListSelector;
+    this.dragAndDropList = dragAndDropList;
     this.isInit = false;
     this.dragAndDropItems = Array.from(
-      this.dragAndDropListSelector.children
+      this.dragAndDropList.children
     ) as HTMLElement[];
     this.draggingClass = draggingClass;
     this.allowDnDFromSelectors = allowDnDFromSelectors;
@@ -60,9 +60,8 @@ class DragAndDrop implements DnD {
           this.dragEndHandler(e, dndItem)
         );
       });
-      this.dragAndDropListSelector.addEventListener(
-        "dragenter",
-        (e: DragEvent) => this.dragEnterHandler(e)
+      this.dragAndDropList.addEventListener("dragenter", (e: DragEvent) =>
+        this.dragEnterHandler(e)
       );
     }
   }
@@ -70,9 +69,9 @@ class DragAndDrop implements DnD {
   dragStartHandler(e: DragEvent, item: HTMLElement) {
     draggingItem = item;
     item.classList.add(this.draggingClass);
-    if (this.dragAndDropListSelector.contains(item)) {
-      initialStartDnDList = this.dragAndDropListSelector;
-      overActiveDragAndDropBox = this.dragAndDropListSelector;
+    if (this.dragAndDropList.contains(item)) {
+      initialStartDnDList = this.dragAndDropList;
+      overActiveDragAndDropBox = this.dragAndDropList;
     }
     this.onDragStart(e);
   }
@@ -82,7 +81,7 @@ class DragAndDrop implements DnD {
     if (e.dataTransfer) {
       e.dataTransfer.dropEffect = "move";
     }
-    let activeDndSelector = this.dragAndDropListSelector;
+    let activeDndSelector = this.dragAndDropList;
     if (overActiveDragAndDropBox) {
       activeDndSelector = overActiveDragAndDropBox;
     }
@@ -104,8 +103,7 @@ class DragAndDrop implements DnD {
 
   dragEndHandler(e: DragEvent, item: HTMLElement) {
     if (this.isRemoveItemLogic) {
-      const dragAndDropListRect =
-        this.dragAndDropListSelector.getBoundingClientRect();
+      const dragAndDropListRect = this.dragAndDropList.getBoundingClientRect();
       if (
         e.clientY < dragAndDropListRect.top ||
         e.clientY > dragAndDropListRect.top + dragAndDropListRect.height ||
