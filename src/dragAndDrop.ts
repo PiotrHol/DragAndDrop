@@ -2,6 +2,7 @@ const defaultDraggingClass = "dragging-item";
 
 let overActiveDragAndDropBox: HTMLElement | null;
 let draggingItem: HTMLElement | null;
+let initialStartDnDList: HTMLElement | null;
 
 interface DnD {
   init: () => void;
@@ -70,6 +71,7 @@ class DragAndDrop implements DnD {
     draggingItem = item;
     item.classList.add(this.draggingClass);
     if (this.dragAndDropListSelector.contains(item)) {
+      initialStartDnDList = this.dragAndDropListSelector;
       overActiveDragAndDropBox = this.dragAndDropListSelector;
     }
     this.onDragStart(e);
@@ -115,21 +117,35 @@ class DragAndDrop implements DnD {
     }
     item.classList.remove(this.draggingClass);
     draggingItem = null;
+    initialStartDnDList = null;
     this.onDragEnd(e);
   }
 
   dragEnterHandler(e: DragEvent) {
     let allowAssignDnDBox = false;
     for (const allowDndElem of this.allowDnDFromSelectors) {
-      if (
-        draggingItem &&
-        draggingItem.parentElement?.classList.contains(allowDndElem)
-      ) {
+      if (overActiveDragAndDropBox?.classList.contains(allowDndElem)) {
         allowAssignDnDBox = true;
         break;
       }
     }
-    if (allowAssignDnDBox) {
+    let isInitDnDList = false;
+    if (initialStartDnDList) {
+      isInitDnDList = true;
+      for (const initDnDListClass of Array.from(
+        initialStartDnDList.classList
+      )) {
+        if (
+          !(e.currentTarget as HTMLElement)?.classList.contains(
+            initDnDListClass
+          )
+        ) {
+          isInitDnDList = false;
+          break;
+        }
+      }
+    }
+    if (allowAssignDnDBox || isInitDnDList) {
       overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
     }
   }
