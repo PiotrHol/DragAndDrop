@@ -61,20 +61,7 @@ class DragAndDrop implements DnD {
       });
       this.dragAndDropListSelector.addEventListener(
         "dragenter",
-        (e: DragEvent) => {
-          let allowAssignDnDBox = false;
-          for (const allowDndElem of this.allowDnDFromSelectors) {
-            if (
-              draggingItem &&
-              draggingItem.parentElement?.classList.contains(allowDndElem)
-            ) {
-              allowAssignDnDBox = true;
-            }
-          }
-          if (allowAssignDnDBox) {
-            overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
-          }
-        }
+        (e: DragEvent) => this.dragEnterHandler(e)
       );
     }
   }
@@ -129,6 +116,22 @@ class DragAndDrop implements DnD {
     item.classList.remove(this.draggingClass);
     draggingItem = null;
     this.onDragEnd(e);
+  }
+
+  dragEnterHandler(e: DragEvent) {
+    let allowAssignDnDBox = false;
+    for (const allowDndElem of this.allowDnDFromSelectors) {
+      if (
+        draggingItem &&
+        draggingItem.parentElement?.classList.contains(allowDndElem)
+      ) {
+        allowAssignDnDBox = true;
+        break;
+      }
+    }
+    if (allowAssignDnDBox) {
+      overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
+    }
   }
 }
 
