@@ -3,6 +3,9 @@ const defaultDraggingClass = "dragging-item";
 let overActiveDragAndDropBox: HTMLElement | null;
 let draggingItem: HTMLElement | null;
 let initialStartDnDList: HTMLElement | null;
+let onDragStartMap = new Map();
+let onDragOverMap = new Map();
+let onDragEndMap = new Map();
 
 interface DnD {
   init: () => void;
@@ -18,9 +21,6 @@ class DragAndDrop implements DnD {
   private draggingClass: string;
   private isRemoveItemLogic: boolean;
   private allowDnDFromSelectors: string[];
-  private onDragStart: (e?: DragEvent) => void;
-  private onDragOver: (e?: DragEvent) => void;
-  private onDragEnd: (e?: DragEvent) => void;
 
   constructor(
     dragAndDropList: HTMLElement,
@@ -39,9 +39,9 @@ class DragAndDrop implements DnD {
     this.draggingClass = draggingClass;
     this.allowDnDFromSelectors = allowDnDFromSelectors;
     this.isRemoveItemLogic = removeItem;
-    this.onDragStart = onDragStart;
-    this.onDragOver = onDragOver;
-    this.onDragEnd = onDragEnd;
+    onDragStartMap.set(dragAndDropList, onDragStart);
+    onDragOverMap.set(dragAndDropList, onDragOver);
+    onDragEndMap.set(dragAndDropList, onDragEnd);
   }
 
   init() {
@@ -72,7 +72,9 @@ class DragAndDrop implements DnD {
       initialStartDnDList = this.dragAndDropList;
       overActiveDragAndDropBox = this.dragAndDropList;
     }
-    this.onDragStart(e);
+    if (onDragStartMap.get(item.parentElement)) {
+      onDragStartMap.get(item.parentElement)();
+    }
   }
 
   dragOverHandler(e: DragEvent) {
@@ -97,7 +99,9 @@ class DragAndDrop implements DnD {
     if (activeDndSelector && draggingItem) {
       activeDndSelector.insertBefore(draggingItem, nextItem);
     }
-    this.onDragOver(e);
+    if (onDragOverMap.get(draggingItem?.parentElement)) {
+      onDragOverMap.get(draggingItem?.parentElement)();
+    }
   }
 
   dragEndHandler(e: DragEvent, item: HTMLElement) {
@@ -119,7 +123,9 @@ class DragAndDrop implements DnD {
     item.classList.remove(this.draggingClass);
     draggingItem = null;
     initialStartDnDList = null;
-    this.onDragEnd(e);
+    if (onDragEndMap.get(item.parentElement)) {
+      onDragEndMap.get(item.parentElement)();
+    }
   }
 
   dragEnterHandler(e: DragEvent) {
