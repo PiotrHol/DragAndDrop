@@ -61,7 +61,6 @@
       .content-wrapper {
         display: flex;
         align-self: flex-start;
-        justify-content: space-between;
       }
       .content-wrapper:first-child {
         margin-right: 20px;
@@ -75,6 +74,9 @@
         padding: 10px 12px;
         border-radius: 8px;
         box-shadow: 1px 1px 4px #b3b3b3;
+      }
+      .content-list:first-child {
+        margin-right: 20px;
       }
       .content-list-element {
         padding: 10px 30px;
@@ -130,6 +132,23 @@
             <li class="content-list-element">Item 5</li>
             <li class="content-list-element">Item 6</li>
             <li class="content-list-element">Item 7</li>
+          </ul>
+        </div>
+        <ul class="content-title"></ul>
+          <li>Two lists with transfer between them</li>
+        </ul>
+        <div class="content-wrapper">
+          <ul class="content-list drag-and-drop-zone-three">
+            <li class="content-list-element">Item 1</li>
+            <li class="content-list-element">Item 2</li>
+            <li class="content-list-element">Item 3</li>
+            <li class="content-list-element">Item 4</li>
+          </ul>
+          <ul class="content-list drag-and-drop-zone-four">
+            <li class="content-list-element">Item 1</li>
+            <li class="content-list-element">Item 2</li>
+            <li class="content-list-element">Item 3</li>
+            <li class="content-list-element">Item 4</li>
           </ul>
         </div>
       </div>
