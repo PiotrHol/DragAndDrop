@@ -38,8 +38,7 @@ class DragAndDrop implements DnD {
     ) as HTMLElement[];
     this.draggingClass = draggingClass;
     this.allowDnDFromSelectors = allowDnDFromSelectors;
-    this.isRemoveItemLogic =
-      allowDnDFromSelectors.length > 0 ? removeItem : false;
+    this.isRemoveItemLogic = removeItem;
     this.onDragStart = onDragStart;
     this.onDragOver = onDragOver;
     this.onDragEnd = onDragEnd;
@@ -102,8 +101,12 @@ class DragAndDrop implements DnD {
   }
 
   dragEndHandler(e: DragEvent, item: HTMLElement) {
-    if (this.isRemoveItemLogic) {
-      const dragAndDropListRect = this.dragAndDropList.getBoundingClientRect();
+    if (
+      this.isRemoveItemLogic &&
+      overActiveDragAndDropBox === this.dragAndDropList
+    ) {
+      const dragAndDropListRect =
+        overActiveDragAndDropBox.getBoundingClientRect();
       if (
         e.clientY < dragAndDropListRect.top ||
         e.clientY > dragAndDropListRect.top + dragAndDropListRect.height ||
