@@ -62,6 +62,9 @@ class DragAndDrop implements DnD {
       this.dragAndDropList.addEventListener("dragenter", (e: DragEvent) =>
         this.dragEnterHandler(e)
       );
+      this.dragAndDropList.addEventListener("dragover", (e: DragEvent) =>
+        this.dragOverHandler(e)
+      );
     }
   }
 
@@ -96,7 +99,11 @@ class DragAndDrop implements DnD {
         e.clientY <= notDraggingItemRect.top + notDraggingItemRect.height / 2
       );
     }) as Node;
-    if (activeDndSelector && draggingItem) {
+    if (
+      activeDndSelector &&
+      draggingItem &&
+      !draggingItem.contains(activeDndSelector)
+    ) {
       activeDndSelector.insertBefore(draggingItem, nextItem);
     }
     if (onDragOverMap.get(draggingItem?.parentElement)) {
