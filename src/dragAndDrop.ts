@@ -3,10 +3,10 @@ const defaultDraggingClass = "dragging-item";
 let overActiveDragAndDropBox: HTMLElement | null;
 let draggingItem: HTMLElement | null;
 let initialStartDnDList: HTMLElement | null;
-let draggingClassMap = new Map();
-let onDragStartMap = new Map();
-let onDragOverMap = new Map();
-let onDragEndMap = new Map();
+let draggingClassMap: Map<HTMLElement, string> = new Map();
+let onDragStartMap: Map<HTMLElement, Function> = new Map();
+let onDragOverMap: Map<HTMLElement, Function> = new Map();
+let onDragEndMap: Map<HTMLElement, Function> = new Map();
 
 interface DnD {
   init: () => void;
@@ -70,13 +70,21 @@ class DragAndDrop implements DnD {
 
   dragStartHandler(e: DragEvent, item: HTMLElement) {
     draggingItem = item;
-    item.classList.add(draggingClassMap.get(item.parentElement));
+    if (item.parentElement) {
+      const draggingClass = draggingClassMap.get(item.parentElement);
+      if (draggingClass) {
+        item.classList.add(draggingClass);
+      }
+    }
     if (this.dragAndDropList.contains(item)) {
       initialStartDnDList = this.dragAndDropList;
       overActiveDragAndDropBox = this.dragAndDropList;
     }
-    if (onDragStartMap.get(item.parentElement)) {
-      onDragStartMap.get(item.parentElement)();
+    if (item.parentElement) {
+      const onDragStartFunc = onDragStartMap.get(item.parentElement);
+      if (onDragStartFunc) {
+        onDragStartFunc();
+      }
     }
   }
 
@@ -106,8 +114,11 @@ class DragAndDrop implements DnD {
     ) {
       activeDndSelector.insertBefore(draggingItem, nextItem);
     }
-    if (onDragOverMap.get(draggingItem?.parentElement)) {
-      onDragOverMap.get(draggingItem?.parentElement)();
+    if (draggingItem && draggingItem.parentElement) {
+      const onDragOverFunc = onDragOverMap.get(draggingItem.parentElement);
+      if (onDragOverFunc) {
+        onDragOverFunc();
+      }
     }
   }
 
@@ -127,14 +138,23 @@ class DragAndDrop implements DnD {
         item.parentNode?.removeChild(item);
       }
     }
-    item.classList.remove(
-      draggingClassMap.get(item.parentElement),
-      draggingClassMap.get(this.dragAndDropList)
-    );
+    if (item.parentElement) {
+      const parentDraggingClass = draggingClassMap.get(item.parentElement);
+      if (parentDraggingClass) {
+        item.classList.remove(parentDraggingClass);
+      }
+    }
+    const dndListDraggingClass = draggingClassMap.get(this.dragAndDropList);
+    if (dndListDraggingClass) {
+      item.classList.remove(dndListDraggingClass);
+    }
     draggingItem = null;
     initialStartDnDList = null;
-    if (onDragEndMap.get(item.parentElement)) {
-      onDragEndMap.get(item.parentElement)();
+    if (item.parentElement) {
+      const onDragEndFunc = onDragEndMap.get(item.parentElement);
+      if (onDragEndFunc) {
+        onDragEndFunc();
+      }
     }
   }
 
@@ -162,14 +182,25 @@ class DragAndDrop implements DnD {
         }
       }
     }
-    if (allowAssignDnDBox || isInitDnDList) {
-      draggingItem?.classList.remove(
-        draggingClassMap.get(overActiveDragAndDropBox)
+    if (!allowAssignDnDBox && !isInitDnDList) {
+      return;
+    }
+    if (overActiveDragAndDropBox) {
+      const overActiveDnDBoxDraggingClass = draggingClassMap.get(
+        overActiveDragAndDropBox
       );
-      overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
-      draggingItem?.classList.add(
-        draggingClassMap.get(overActiveDragAndDropBox)
+      if (overActiveDnDBoxDraggingClass) {
+        draggingItem?.classList.remove(overActiveDnDBoxDraggingClass);
+      }
+    }
+    overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
+    if (overActiveDragAndDropBox) {
+      const overActiveDnDBoxDraggingClass = draggingClassMap.get(
+        overActiveDragAndDropBox
       );
+      if (overActiveDnDBoxDraggingClass) {
+        draggingItem?.classList.add(overActiveDnDBoxDraggingClass);
+      }
     }
   }
 }
