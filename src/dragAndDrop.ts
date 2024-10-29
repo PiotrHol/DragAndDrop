@@ -3,6 +3,7 @@ const defaultDraggingClass = "dragging-item";
 let overActiveDragAndDropBox: HTMLElement | null;
 let draggingItem: HTMLElement | null;
 let initialStartDnDList: HTMLElement | null;
+let draggingClassMap = new Map();
 let onDragStartMap = new Map();
 let onDragOverMap = new Map();
 let onDragEndMap = new Map();
@@ -18,7 +19,6 @@ class DragAndDrop implements DnD {
   private dragAndDropList: HTMLElement;
   private isInit: boolean;
   private dragAndDropItems: HTMLElement[];
-  private draggingClass: string;
   private isRemoveItemLogic: boolean;
   private allowDnDFromSelectors: string[];
 
@@ -36,9 +36,9 @@ class DragAndDrop implements DnD {
     this.dragAndDropItems = Array.from(
       this.dragAndDropList.children
     ) as HTMLElement[];
-    this.draggingClass = draggingClass;
     this.allowDnDFromSelectors = allowDnDFromSelectors;
     this.isRemoveItemLogic = removeItem;
+    draggingClassMap.set(dragAndDropList, draggingClass);
     onDragStartMap.set(dragAndDropList, onDragStart);
     onDragOverMap.set(dragAndDropList, onDragOver);
     onDragEndMap.set(dragAndDropList, onDragEnd);
@@ -70,7 +70,7 @@ class DragAndDrop implements DnD {
 
   dragStartHandler(e: DragEvent, item: HTMLElement) {
     draggingItem = item;
-    item.classList.add(this.draggingClass);
+    item.classList.add(draggingClassMap.get(item.parentElement));
     if (this.dragAndDropList.contains(item)) {
       initialStartDnDList = this.dragAndDropList;
       overActiveDragAndDropBox = this.dragAndDropList;
@@ -127,7 +127,10 @@ class DragAndDrop implements DnD {
         item.parentNode?.removeChild(item);
       }
     }
-    item.classList.remove(this.draggingClass);
+    item.classList.remove(
+      draggingClassMap.get(item.parentElement),
+      draggingClassMap.get(this.dragAndDropList)
+    );
     draggingItem = null;
     initialStartDnDList = null;
     if (onDragEndMap.get(item.parentElement)) {
@@ -160,7 +163,13 @@ class DragAndDrop implements DnD {
       }
     }
     if (allowAssignDnDBox || isInitDnDList) {
+      draggingItem?.classList.remove(
+        draggingClassMap.get(overActiveDragAndDropBox)
+      );
       overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
+      draggingItem?.classList.add(
+        draggingClassMap.get(overActiveDragAndDropBox)
+      );
     }
   }
 }
