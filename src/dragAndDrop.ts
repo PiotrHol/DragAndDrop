@@ -263,29 +263,3 @@ HTMLElement.prototype.dragAndDrop = function (settings) {
 };
 
 export {};
-
-// Add to HTML file and remove here
-
-(document.querySelector(".drag-and-drop-zone-one") as HTMLElement).dragAndDrop({
-  onDragStart: () => console.log("Drag start"),
-  onDragEnd: () => console.log("Drag end"),
-});
-
-(document.querySelector(".drag-and-drop-zone-two") as HTMLElement).dragAndDrop({
-  draggingClass: "second-dragging-item",
-  removeItem: true,
-});
-
-(
-  document.querySelector(".drag-and-drop-zone-three") as HTMLElement
-).dragAndDrop({
-  draggingClass: "second-dragging-item",
-  allowDnDFromSelectors: "drag-and-drop-zone-four",
-});
-
-(document.querySelector(".drag-and-drop-zone-four") as HTMLElement).dragAndDrop(
-  {
-    draggingClass: "second-dragging-item",
-    allowDnDFromSelectors: "drag-and-drop-zone-three",
-  }
-);
