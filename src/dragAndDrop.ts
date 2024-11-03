@@ -1,12 +1,14 @@
 const defaultDraggingClass = "dragging-item";
 
-let overActiveDragAndDropBox: HTMLElement | null;
-let draggingItem: HTMLElement | null;
-let initialStartDnDList: HTMLElement | null;
-let draggingClassMap: Map<HTMLElement, string> = new Map();
-let onDragStartMap: Map<HTMLElement, Function> = new Map();
-let onDragOverMap: Map<HTMLElement, Function> = new Map();
-let onDragEndMap: Map<HTMLElement, Function> = new Map();
+abstract class BaseDragAndDrop {
+  static overActiveDragAndDropBox: HTMLElement | null = null;
+  static draggingItem: HTMLElement | null = null;
+  static initialStartDnDList: HTMLElement | null = null;
+  static draggingClassMap: Map<HTMLElement, string> = new Map();
+  static onDragStartMap: Map<HTMLElement, Function> = new Map();
+  static onDragOverMap: Map<HTMLElement, Function> = new Map();
+  static onDragEndMap: Map<HTMLElement, Function> = new Map();
+}
 
 interface DnD {
   init: () => void;
@@ -15,7 +17,7 @@ interface DnD {
   dragEndHandler: (e: DragEvent, element: HTMLElement) => void;
 }
 
-class DragAndDrop implements DnD {
+class DragAndDrop extends BaseDragAndDrop implements DnD {
   private dragAndDropList: HTMLElement;
   private isInit: boolean;
   private dragAndDropItems: HTMLElement[];
@@ -31,6 +33,7 @@ class DragAndDrop implements DnD {
     onDragOver: (e?: DragEvent) => void,
     onDragEnd: (e?: DragEvent) => void
   ) {
+    super();
     this.dragAndDropList = dragAndDropList;
     this.isInit = false;
     this.dragAndDropItems = Array.from(
@@ -38,10 +41,10 @@ class DragAndDrop implements DnD {
     ) as HTMLElement[];
     this.allowDnDFromSelectors = allowDnDFromSelectors;
     this.isRemoveItemLogic = removeItem;
-    draggingClassMap.set(dragAndDropList, draggingClass);
-    onDragStartMap.set(dragAndDropList, onDragStart);
-    onDragOverMap.set(dragAndDropList, onDragOver);
-    onDragEndMap.set(dragAndDropList, onDragEnd);
+    DragAndDrop.draggingClassMap.set(dragAndDropList, draggingClass);
+    DragAndDrop.onDragStartMap.set(dragAndDropList, onDragStart);
+    DragAndDrop.onDragOverMap.set(dragAndDropList, onDragOver);
+    DragAndDrop.onDragEndMap.set(dragAndDropList, onDragEnd);
   }
 
   init() {
@@ -69,19 +72,23 @@ class DragAndDrop implements DnD {
   }
 
   dragStartHandler(item: HTMLElement) {
-    draggingItem = item;
+    DragAndDrop.draggingItem = item;
     if (item.parentElement) {
-      const draggingClass = draggingClassMap.get(item.parentElement);
+      const draggingClass = DragAndDrop.draggingClassMap.get(
+        item.parentElement
+      );
       if (draggingClass) {
         item.classList.add(draggingClass);
       }
     }
     if (this.dragAndDropList.contains(item)) {
-      initialStartDnDList = this.dragAndDropList;
-      overActiveDragAndDropBox = this.dragAndDropList;
+      DragAndDrop.initialStartDnDList = this.dragAndDropList;
+      DragAndDrop.overActiveDragAndDropBox = this.dragAndDropList;
     }
     if (item.parentElement) {
-      const onDragStartFunc = onDragStartMap.get(item.parentElement);
+      const onDragStartFunc = DragAndDrop.onDragStartMap.get(
+        item.parentElement
+      );
       if (onDragStartFunc) {
         onDragStartFunc();
       }
@@ -94,12 +101,12 @@ class DragAndDrop implements DnD {
       e.dataTransfer.dropEffect = "move";
     }
     let activeDndSelector = this.dragAndDropList;
-    if (overActiveDragAndDropBox) {
-      activeDndSelector = overActiveDragAndDropBox;
+    if (DragAndDrop.overActiveDragAndDropBox) {
+      activeDndSelector = DragAndDrop.overActiveDragAndDropBox;
     }
     const dndItems = Array.from(activeDndSelector.children) as HTMLElement[];
     const notDraggingItems = dndItems.filter(
-      (item) => item !== draggingItem
+      (item) => item !== DragAndDrop.draggingItem
     ) as HTMLElement[];
     const nextItem = notDraggingItems.find((item) => {
       const notDraggingItemRect = item.getBoundingClientRect();
@@ -109,13 +116,15 @@ class DragAndDrop implements DnD {
     }) as Node;
     if (
       activeDndSelector &&
-      draggingItem &&
-      !draggingItem.contains(activeDndSelector)
+      DragAndDrop.draggingItem &&
+      !DragAndDrop.draggingItem.contains(activeDndSelector)
     ) {
-      activeDndSelector.insertBefore(draggingItem, nextItem);
+      activeDndSelector.insertBefore(DragAndDrop.draggingItem, nextItem);
     }
-    if (draggingItem && draggingItem.parentElement) {
-      const onDragOverFunc = onDragOverMap.get(draggingItem.parentElement);
+    if (DragAndDrop.draggingItem && DragAndDrop.draggingItem.parentElement) {
+      const onDragOverFunc = DragAndDrop.onDragOverMap.get(
+        DragAndDrop.draggingItem.parentElement
+      );
       if (onDragOverFunc) {
         onDragOverFunc();
       }
@@ -125,10 +134,10 @@ class DragAndDrop implements DnD {
   dragEndHandler(e: DragEvent, item: HTMLElement) {
     if (
       this.isRemoveItemLogic &&
-      overActiveDragAndDropBox === this.dragAndDropList
+      DragAndDrop.overActiveDragAndDropBox === this.dragAndDropList
     ) {
       const dragAndDropListRect =
-        overActiveDragAndDropBox.getBoundingClientRect();
+        DragAndDrop.overActiveDragAndDropBox.getBoundingClientRect();
       if (
         e.clientY < dragAndDropListRect.top ||
         e.clientY > dragAndDropListRect.top + dragAndDropListRect.height ||
@@ -139,19 +148,23 @@ class DragAndDrop implements DnD {
       }
     }
     if (item.parentElement) {
-      const parentDraggingClass = draggingClassMap.get(item.parentElement);
+      const parentDraggingClass = DragAndDrop.draggingClassMap.get(
+        item.parentElement
+      );
       if (parentDraggingClass) {
         item.classList.remove(parentDraggingClass);
       }
     }
-    const dndListDraggingClass = draggingClassMap.get(this.dragAndDropList);
+    const dndListDraggingClass = DragAndDrop.draggingClassMap.get(
+      this.dragAndDropList
+    );
     if (dndListDraggingClass) {
       item.classList.remove(dndListDraggingClass);
     }
-    draggingItem = null;
-    initialStartDnDList = null;
+    DragAndDrop.draggingItem = null;
+    DragAndDrop.initialStartDnDList = null;
     if (item.parentElement) {
-      const onDragEndFunc = onDragEndMap.get(item.parentElement);
+      const onDragEndFunc = DragAndDrop.onDragEndMap.get(item.parentElement);
       if (onDragEndFunc) {
         onDragEndFunc();
       }
@@ -161,16 +174,18 @@ class DragAndDrop implements DnD {
   dragEnterHandler(e: DragEvent) {
     let allowAssignDnDBox = false;
     for (const allowDndElem of this.allowDnDFromSelectors) {
-      if (overActiveDragAndDropBox?.classList.contains(allowDndElem)) {
+      if (
+        DragAndDrop.overActiveDragAndDropBox?.classList.contains(allowDndElem)
+      ) {
         allowAssignDnDBox = true;
         break;
       }
     }
     let isInitDnDList = false;
-    if (initialStartDnDList) {
+    if (DragAndDrop.initialStartDnDList) {
       isInitDnDList = true;
       for (const initDnDListClass of Array.from(
-        initialStartDnDList.classList
+        DragAndDrop.initialStartDnDList.classList
       )) {
         if (
           !(e.currentTarget as HTMLElement)?.classList.contains(
@@ -185,21 +200,23 @@ class DragAndDrop implements DnD {
     if (!allowAssignDnDBox && !isInitDnDList) {
       return;
     }
-    if (overActiveDragAndDropBox) {
-      const overActiveDnDBoxDraggingClass = draggingClassMap.get(
-        overActiveDragAndDropBox
+    if (DragAndDrop.overActiveDragAndDropBox) {
+      const overActiveDnDBoxDraggingClass = DragAndDrop.draggingClassMap.get(
+        DragAndDrop.overActiveDragAndDropBox
       );
       if (overActiveDnDBoxDraggingClass) {
-        draggingItem?.classList.remove(overActiveDnDBoxDraggingClass);
+        DragAndDrop.draggingItem?.classList.remove(
+          overActiveDnDBoxDraggingClass
+        );
       }
     }
-    overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
-    if (overActiveDragAndDropBox) {
-      const overActiveDnDBoxDraggingClass = draggingClassMap.get(
-        overActiveDragAndDropBox
+    DragAndDrop.overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
+    if (DragAndDrop.overActiveDragAndDropBox) {
+      const overActiveDnDBoxDraggingClass = DragAndDrop.draggingClassMap.get(
+        DragAndDrop.overActiveDragAndDropBox
       );
       if (overActiveDnDBoxDraggingClass) {
-        draggingItem?.classList.add(overActiveDnDBoxDraggingClass);
+        DragAndDrop.draggingItem?.classList.add(overActiveDnDBoxDraggingClass);
       }
     }
   }
