@@ -15,6 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,700;1,700&display=swap"
       rel="stylesheet"
     />
+    <script src="DragAndDrop/dragAndDrop.min.js"></script>
     <style>
       body {
         width: 100%;
@@ -134,7 +135,7 @@
             <li class="content-list-element">Item 7</li>
           </ul>
         </div>
-        <ul class="content-title"></ul>
+        <ul class="content-title">
           <li>Two lists with transfer between them</li>
         </ul>
         <div class="content-wrapper">
@@ -153,5 +154,34 @@
         </div>
       </div>
     </div>
+    <script>
+      if (document.querySelector(".drag-and-drop-zone-one")) {
+        document.querySelector(".drag-and-drop-zone-one").dragAndDrop({
+          onDragStart: () => console.log("Drag start"),
+          onDragEnd: () => console.log("Drag end"),
+        });
+      }
+
+      if (document.querySelector(".drag-and-drop-zone-two")) {
+        document.querySelector(".drag-and-drop-zone-two").dragAndDrop({
+          draggingClass: "second-dragging-item",
+          removeItem: true,
+        });
+      }
+
+      if (document.querySelector(".drag-and-drop-zone-three")) {
+        document.querySelector(".drag-and-drop-zone-three").dragAndDrop({
+          draggingClass: "second-dragging-item",
+          allowDnDFromSelectors: "drag-and-drop-zone-four",
+        });
+      }
+
+      if (document.querySelector(".drag-and-drop-zone-four")) {
+        document.querySelector(".drag-and-drop-zone-four").dragAndDrop({
+          draggingClass: "second-dragging-item",
+          allowDnDFromSelectors: "drag-and-drop-zone-three",
+        });
+      }
+    </script>
   </body>
 </html>
