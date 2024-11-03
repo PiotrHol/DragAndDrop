@@ -4,6 +4,7 @@ abstract class BaseDragAndDrop {
   static overActiveDragAndDropBox: HTMLElement | null = null;
   static draggingItem: HTMLElement | null = null;
   static initialStartDnDList: HTMLElement | null = null;
+  static lastTouchMoveElement: HTMLElement | null = null;
   static draggingClassMap: Map<HTMLElement, string> = new Map();
   static onDragStartMap: Map<HTMLElement, Function> = new Map();
   static onDragOverMap: Map<HTMLElement, Function> = new Map();
@@ -13,8 +14,10 @@ abstract class BaseDragAndDrop {
 interface DnD {
   init: () => void;
   dragStartHandler: (element: HTMLElement) => void;
-  dragOverHandler: (e: DragEvent) => void;
-  dragEndHandler: (e: DragEvent, element: HTMLElement) => void;
+  dragOverHandler: (e: DragEvent | TouchEvent) => void;
+  dragEndHandler: (e: DragEvent | TouchEvent, element: HTMLElement) => void;
+  dragEnterHandler: (e: DragEvent | TouchEvent) => void;
+  touchMoveHandler: (e: TouchEvent) => void;
 }
 
 class DragAndDrop extends BaseDragAndDrop implements DnD {
@@ -55,10 +58,19 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
         dndItem.addEventListener("dragstart", () =>
           this.dragStartHandler(dndItem)
         );
+        dndItem.addEventListener("touchstart", () =>
+          this.dragStartHandler(dndItem)
+        );
         dndItem.addEventListener("dragover", (e: DragEvent) =>
           this.dragOverHandler(e)
         );
+        dndItem.addEventListener("touchmove", (e: TouchEvent) =>
+          this.dragOverHandler(e)
+        );
         dndItem.addEventListener("dragend", (e: DragEvent) =>
+          this.dragEndHandler(e, dndItem)
+        );
+        dndItem.addEventListener("touchend", (e: TouchEvent) =>
           this.dragEndHandler(e, dndItem)
         );
       });
@@ -67,6 +79,12 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
       );
       this.dragAndDropList.addEventListener("dragover", (e: DragEvent) =>
         this.dragOverHandler(e)
+      );
+      this.dragAndDropList.addEventListener("touchmove", (e: TouchEvent) =>
+        this.dragOverHandler(e)
+      );
+      document.addEventListener("touchmove", (e: TouchEvent) =>
+        this.touchMoveHandler(e)
       );
     }
   }
@@ -95,10 +113,16 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
     }
   }
 
-  dragOverHandler(e: DragEvent) {
+  dragOverHandler(e: DragEvent | TouchEvent) {
     e.preventDefault();
-    if (e.dataTransfer) {
+    if (e instanceof DragEvent && e.dataTransfer) {
       e.dataTransfer.dropEffect = "move";
+    }
+    let eventClientY: number;
+    if (e instanceof TouchEvent) {
+      eventClientY = e.changedTouches[0].clientY;
+    } else {
+      eventClientY = e.clientY;
     }
     let activeDndSelector = this.dragAndDropList;
     if (DragAndDrop.overActiveDragAndDropBox) {
@@ -111,7 +135,7 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
     const nextItem = notDraggingItems.find((item) => {
       const notDraggingItemRect = item.getBoundingClientRect();
       return (
-        e.clientY <= notDraggingItemRect.top + notDraggingItemRect.height / 2
+        eventClientY <= notDraggingItemRect.top + notDraggingItemRect.height / 2
       );
     }) as Node;
     if (
@@ -131,18 +155,44 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
     }
   }
 
-  dragEndHandler(e: DragEvent, item: HTMLElement) {
+  touchMoveHandler(e: TouchEvent) {
+    const currentMoveElement = document.elementFromPoint(
+      e.touches[0].clientX,
+      e.touches[0].clientY
+    ) as HTMLElement;
+    if (
+      currentMoveElement &&
+      currentMoveElement === this.dragAndDropList &&
+      DragAndDrop.lastTouchMoveElement !== currentMoveElement
+    ) {
+      this.dragEnterHandler(e);
+      DragAndDrop.lastTouchMoveElement = currentMoveElement;
+      return;
+    }
+    DragAndDrop.lastTouchMoveElement = null;
+  }
+
+  dragEndHandler(e: DragEvent | TouchEvent, item: HTMLElement) {
     if (
       this.isRemoveItemLogic &&
       DragAndDrop.overActiveDragAndDropBox === this.dragAndDropList
     ) {
       const dragAndDropListRect =
         DragAndDrop.overActiveDragAndDropBox.getBoundingClientRect();
+      let eventClientX: number;
+      let eventClientY: number;
+      if (e instanceof TouchEvent) {
+        eventClientX = e.changedTouches[0].clientX;
+        eventClientY = e.changedTouches[0].clientY;
+      } else {
+        eventClientX = e.clientX;
+        eventClientY = e.clientY;
+      }
       if (
-        e.clientY < dragAndDropListRect.top ||
-        e.clientY > dragAndDropListRect.top + dragAndDropListRect.height ||
-        e.clientX < dragAndDropListRect.left ||
-        e.clientX > dragAndDropListRect.left + dragAndDropListRect.width
+        eventClientY < dragAndDropListRect.top ||
+        eventClientY > dragAndDropListRect.top + dragAndDropListRect.height ||
+        eventClientX < dragAndDropListRect.left ||
+        eventClientX > dragAndDropListRect.left + dragAndDropListRect.width
       ) {
         item.parentNode?.removeChild(item);
       }
@@ -171,7 +221,16 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
     }
   }
 
-  dragEnterHandler(e: DragEvent) {
+  dragEnterHandler(e: DragEvent | TouchEvent) {
+    let eventCurrentTarget: EventTarget | null;
+    if (e instanceof TouchEvent) {
+      eventCurrentTarget = document.elementFromPoint(
+        e.touches[0].clientX,
+        e.touches[0].clientY
+      );
+    } else {
+      eventCurrentTarget = e.currentTarget;
+    }
     let allowAssignDnDBox = false;
     for (const allowDndElem of this.allowDnDFromSelectors) {
       if (
@@ -188,7 +247,7 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
         DragAndDrop.initialStartDnDList.classList
       )) {
         if (
-          !(e.currentTarget as HTMLElement)?.classList.contains(
+          !(eventCurrentTarget as HTMLElement)?.classList.contains(
             initDnDListClass
           )
         ) {
@@ -210,7 +269,7 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
         );
       }
     }
-    DragAndDrop.overActiveDragAndDropBox = <HTMLElement>e.currentTarget;
+    DragAndDrop.overActiveDragAndDropBox = <HTMLElement>eventCurrentTarget;
     if (DragAndDrop.overActiveDragAndDropBox) {
       const overActiveDnDBoxDraggingClass = DragAndDrop.draggingClassMap.get(
         DragAndDrop.overActiveDragAndDropBox
