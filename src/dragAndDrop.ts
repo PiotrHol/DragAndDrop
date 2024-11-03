@@ -5,6 +5,7 @@ abstract class BaseDragAndDrop {
   static draggingItem: HTMLElement | null = null;
   static initialStartDnDList: HTMLElement | null = null;
   static lastTouchMoveElement: HTMLElement | null = null;
+  static touchDnDPreview: HTMLElement | null = null;
   static draggingClassMap: Map<HTMLElement, string> = new Map();
   static onDragStartMap: Map<HTMLElement, Function> = new Map();
   static onDragOverMap: Map<HTMLElement, Function> = new Map();
@@ -17,7 +18,9 @@ interface DnD {
   dragOverHandler: (e: DragEvent | TouchEvent) => void;
   dragEndHandler: (e: DragEvent | TouchEvent, element: HTMLElement) => void;
   dragEnterHandler: (e: DragEvent | TouchEvent) => void;
+  touchStartHandler: (e: TouchEvent, element: HTMLElement) => void;
   touchMoveHandler: (e: TouchEvent) => void;
+  touchEndHandler: (e: TouchEvent, element: HTMLElement) => void;
 }
 
 class DragAndDrop extends BaseDragAndDrop implements DnD {
@@ -58,9 +61,9 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
         dndItem.addEventListener("dragstart", () =>
           this.dragStartHandler(dndItem)
         );
-        dndItem.addEventListener("touchstart", () =>
-          this.dragStartHandler(dndItem)
-        );
+        dndItem.addEventListener("touchstart", (e: TouchEvent) => {
+          this.touchStartHandler(e, dndItem);
+        });
         dndItem.addEventListener("dragover", (e: DragEvent) =>
           this.dragOverHandler(e)
         );
@@ -70,9 +73,9 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
         dndItem.addEventListener("dragend", (e: DragEvent) =>
           this.dragEndHandler(e, dndItem)
         );
-        dndItem.addEventListener("touchend", (e: TouchEvent) =>
-          this.dragEndHandler(e, dndItem)
-        );
+        dndItem.addEventListener("touchend", (e: TouchEvent) => {
+          this.touchEndHandler(e, dndItem);
+        });
       });
       this.dragAndDropList.addEventListener("dragenter", (e: DragEvent) =>
         this.dragEnterHandler(e)
@@ -111,6 +114,24 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
         onDragStartFunc();
       }
     }
+  }
+
+  touchStartHandler(e: TouchEvent, item: HTMLElement) {
+    DragAndDrop.touchDnDPreview = item.cloneNode(true) as HTMLElement;
+    if (DragAndDrop.touchDnDPreview.getAttribute("id")) {
+      DragAndDrop.touchDnDPreview.setAttribute("id", "");
+    }
+    if (DragAndDrop.touchDnDPreview.getAttribute("name")) {
+      DragAndDrop.touchDnDPreview.setAttribute("name", "");
+    }
+    DragAndDrop.touchDnDPreview.style.position = "fixed";
+    DragAndDrop.touchDnDPreview.style.pointerEvents = "none";
+    DragAndDrop.touchDnDPreview.style.zIndex = "10000";
+    DragAndDrop.touchDnDPreview.style.transition = "none";
+    DragAndDrop.touchDnDPreview.style.left = `${e.touches[0].clientX}px`;
+    DragAndDrop.touchDnDPreview.style.top = `${e.touches[0].clientY}px`;
+    document.body.appendChild(DragAndDrop.touchDnDPreview);
+    this.dragStartHandler(item);
   }
 
   dragOverHandler(e: DragEvent | TouchEvent) {
@@ -156,9 +177,15 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
   }
 
   touchMoveHandler(e: TouchEvent) {
+    const eventClientX = e.touches[0].clientX;
+    const eventClientY = e.touches[0].clientY;
+    if (DragAndDrop.touchDnDPreview) {
+      DragAndDrop.touchDnDPreview.style.left = `${eventClientX}px`;
+      DragAndDrop.touchDnDPreview.style.top = `${eventClientY}px`;
+    }
     const currentMoveElement = document.elementFromPoint(
-      e.touches[0].clientX,
-      e.touches[0].clientY
+      eventClientX,
+      eventClientY
     ) as HTMLElement;
     if (
       currentMoveElement &&
@@ -219,6 +246,14 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
         onDragEndFunc();
       }
     }
+  }
+
+  touchEndHandler(e: TouchEvent, item: HTMLElement) {
+    if (DragAndDrop.touchDnDPreview) {
+      DragAndDrop.touchDnDPreview.remove();
+      DragAndDrop.touchDnDPreview = null;
+    }
+    this.dragEndHandler(e, item);
   }
 
   dragEnterHandler(e: DragEvent | TouchEvent) {
