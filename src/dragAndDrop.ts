@@ -10,7 +10,7 @@ let onDragEndMap: Map<HTMLElement, Function> = new Map();
 
 interface DnD {
   init: () => void;
-  dragStartHandler: (e: DragEvent, element: HTMLElement) => void;
+  dragStartHandler: (element: HTMLElement) => void;
   dragOverHandler: (e: DragEvent) => void;
   dragEndHandler: (e: DragEvent, element: HTMLElement) => void;
 }
@@ -49,8 +49,8 @@ class DragAndDrop implements DnD {
       this.isInit = true;
       this.dragAndDropItems.forEach((dndItem) => {
         dndItem.setAttribute("draggable", "true");
-        dndItem.addEventListener("dragstart", (e: DragEvent) =>
-          this.dragStartHandler(e, dndItem)
+        dndItem.addEventListener("dragstart", () =>
+          this.dragStartHandler(dndItem)
         );
         dndItem.addEventListener("dragover", (e: DragEvent) =>
           this.dragOverHandler(e)
@@ -68,7 +68,7 @@ class DragAndDrop implements DnD {
     }
   }
 
-  dragStartHandler(e: DragEvent, item: HTMLElement) {
+  dragStartHandler(item: HTMLElement) {
     draggingItem = item;
     if (item.parentElement) {
       const draggingClass = draggingClassMap.get(item.parentElement);
