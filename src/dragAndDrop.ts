@@ -28,13 +28,13 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
   private isInit: boolean;
   private dragAndDropItems: HTMLElement[];
   private isRemoveItemLogic: boolean;
-  private allowDnDFromSelectors: string[];
+  private allowDnDFromClasses: string[];
 
   constructor(
     dragAndDropList: HTMLElement,
     draggingClass: string,
     removeItem: boolean,
-    allowDnDFromSelectors: string[],
+    allowDnDFromClasses: string[],
     onDragStart: (e?: DragEvent) => void,
     onDragOver: (e?: DragEvent) => void,
     onDragEnd: (e?: DragEvent) => void
@@ -45,7 +45,7 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
     this.dragAndDropItems = Array.from(
       this.dragAndDropList.children
     ) as HTMLElement[];
-    this.allowDnDFromSelectors = allowDnDFromSelectors;
+    this.allowDnDFromClasses = allowDnDFromClasses;
     this.isRemoveItemLogic = removeItem;
     DragAndDrop.draggingClassMap.set(dragAndDropList, draggingClass);
     DragAndDrop.onDragStartMap.set(dragAndDropList, onDragStart);
@@ -267,7 +267,7 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
       eventCurrentTarget = e.currentTarget;
     }
     let allowAssignDnDBox = false;
-    for (const allowDndElem of this.allowDnDFromSelectors) {
+    for (const allowDndElem of this.allowDnDFromClasses) {
       if (
         DragAndDrop.overActiveDragAndDropBox?.classList.contains(allowDndElem)
       ) {
@@ -321,7 +321,7 @@ declare global {
     dragAndDrop(settings?: {
       draggingClass?: string;
       removeItem?: boolean;
-      allowDnDFromSelectors?: string | string[];
+      allowDnDFromClasses?: string | string[];
       onDragStart?: (e?: DragEvent) => void;
       onDragOver?: (e?: DragEvent) => void;
       onDragEnd?: (e?: DragEvent) => void;
@@ -335,10 +335,10 @@ HTMLElement.prototype.dragAndDrop = function (settings) {
       ? settings.draggingClass
       : defaultDraggingClass,
     removeItem: settings?.removeItem ? settings.removeItem : false,
-    allowDnDFromSelectors: settings?.allowDnDFromSelectors
-      ? Array.isArray(settings.allowDnDFromSelectors)
-        ? [...settings.allowDnDFromSelectors]
-        : [settings.allowDnDFromSelectors]
+    allowDnDFromClasses: settings?.allowDnDFromClasses
+      ? Array.isArray(settings.allowDnDFromClasses)
+        ? [...settings.allowDnDFromClasses]
+        : [settings.allowDnDFromClasses]
       : [],
     onDragStart: settings?.onDragStart ? settings.onDragStart : () => {},
     onDragOver: settings?.onDragOver ? settings.onDragOver : () => {},
@@ -348,7 +348,7 @@ HTMLElement.prototype.dragAndDrop = function (settings) {
     this,
     settingsToSet.draggingClass,
     settingsToSet.removeItem,
-    settingsToSet.allowDnDFromSelectors,
+    settingsToSet.allowDnDFromClasses,
     settingsToSet.onDragStart,
     settingsToSet.onDragOver,
     settingsToSet.onDragEnd
