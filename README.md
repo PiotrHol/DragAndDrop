@@ -2,6 +2,10 @@
 
 DragAndDrop is a minimalist JavaScript library that enables intuitive drag-and-drop functionality for rearranging elements on a webpage. Integrate it into your project effortlessly to enhance interactivity and user experience.
 
+## Demo
+
+https://piotrhol.github.io/DragAndDrop/
+
 ## Installation
 
 To install DragAndDrop, follow these steps:
@@ -15,14 +19,14 @@ To install DragAndDrop, follow these steps:
 
 After adding the library to your project, initialize it on any HTML element containing items to be dragged and dropped. Customize its behavior with optional settings:
 
-| Setting                 | Type                 | Description                                                                                          |
-| ----------------------- | -------------------- | ---------------------------------------------------------------------------------------------------- |
-| `draggingClass`         | `string`             | The class applied to an item when it is being dragged (default: `"dragging-item"`).                  |
-| `removeItem`            | `boolean`            | Specifies if an item should be removed if dropped outside the drag-and-drop list (default: `false`). |
-| `allowDnDFromSelectors` | `string \| string[]` | A CSS selector or an array of selectors defining elements from which dragging is allowed.            |
-| `onDragStart`           | `Function`           | A callback function triggered when dragging starts.                                                  |
-| `onDragOver`            | `Function`           | A callback function triggered when an item is dragged over another item in the list.                 |
-| `onDragEnd`             | `Function`           | A callback function triggered when dragging ends.                                                    |
+| Setting               | Type                 | Description                                                                                          |
+| --------------------- | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `draggingClass`       | `string`             | The class applied to an item when it is being dragged (default: `"dragging-item"`).                  |
+| `removeItem`          | `boolean`            | Specifies if an item should be removed if dropped outside the drag-and-drop list (default: `false`). |
+| `allowDnDFromClasses` | `string \| string[]` | A CSS class or an array of classes defining elements from which dragging is allowed.                 |
+| `onDragStart`         | `Function`           | A callback function triggered when dragging starts.                                                  |
+| `onDragOver`          | `Function`           | A callback function triggered when an item is dragged over another item in the list.                 |
+| `onDragEnd`           | `Function`           | A callback function triggered when dragging ends.                                                    |
 
 ### Example Usage
 
@@ -44,7 +48,7 @@ After adding the library to your project, initialize it on any HTML element cont
     <script>
       document.getElementById("myDragAndDropList").dragAndDrop({
         removeItem: true,
-        allowDnDFromSelectors: ".other-list",
+        allowDnDFromClasses: "other-list",
         onDragStart: () => console.log("Drag started"),
         onDragOver: () => console.log("Dragged over"),
         onDragEnd: () => console.log("Drag ended"),
@@ -58,5 +62,5 @@ After adding the library to your project, initialize it on any HTML element cont
 
 - Simply call `.dragAndDrop()` on any HTML element containing items to enable drag-and-drop functionality.
 - If `draggingClass` is omitted, the default class `"dragging-item"` will be applied to the dragged item.
-- You can pass either a single CSS selector string or an array of selectors to `allowDnDFromSelectors`. If a single selector is used, you do not need to wrap it in an array.
+- You can pass either a single CSS class string or an array of classes to `allowDnDFromClasses`. If a single class is used, you do not need to wrap it in an array.
 - You can initialize multiple elements independently, allowing for separate drag-and-drop zones within a single page.
