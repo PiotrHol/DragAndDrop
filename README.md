@@ -1,6 +1,6 @@
 # DragAndDrop
 
-DragAndDrop is a minimalist JavaScript library that enables intuitive drag-and-drop functionality for rearranging elements on a webpage. Integrate it into your project effortlessly to enhance interactivity and user experience.
+DragAndDrop is a minimalist library that enables intuitive drag-and-drop functionality for rearranging elements on a webpage. Integrate it into your project effortlessly to enhance interactivity and user experience.
 
 ## Demo
 
