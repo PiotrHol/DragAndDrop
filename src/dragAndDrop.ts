@@ -136,14 +136,14 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
 
   dragOverHandler(e: DragEvent | TouchEvent) {
     e.preventDefault();
-    if (e instanceof DragEvent && e.dataTransfer) {
-      e.dataTransfer.dropEffect = "move";
-    }
     let eventClientY: number;
-    if (e instanceof TouchEvent) {
+    if ("changedTouches" in e) {
       eventClientY = e.changedTouches[0].clientY;
     } else {
       eventClientY = e.clientY;
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = "move";
+      }
     }
     let activeDndSelector = this.dragAndDropList;
     if (DragAndDrop.overActiveDragAndDropBox) {
@@ -208,7 +208,7 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
         DragAndDrop.overActiveDragAndDropBox.getBoundingClientRect();
       let eventClientX: number;
       let eventClientY: number;
-      if (e instanceof TouchEvent) {
+      if ("changedTouches" in e) {
         eventClientX = e.changedTouches[0].clientX;
         eventClientY = e.changedTouches[0].clientY;
       } else {
@@ -258,7 +258,7 @@ class DragAndDrop extends BaseDragAndDrop implements DnD {
 
   dragEnterHandler(e: DragEvent | TouchEvent) {
     let eventCurrentTarget: EventTarget | null;
-    if (e instanceof TouchEvent) {
+    if ("touches" in e) {
       eventCurrentTarget = document.elementFromPoint(
         e.touches[0].clientX,
         e.touches[0].clientY
